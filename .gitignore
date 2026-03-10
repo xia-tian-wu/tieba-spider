@@ -1,3 +1,6 @@
 TiebaSpider.spec
 __pycache__
-data
+
+/data
+/build
+/dist

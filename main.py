@@ -12,7 +12,7 @@ from ui.pages.pages_crawl import PageCrawl
 from ui.pages.functions.progress_manager import TaskProgressManager
 from ui.pages.pages_manage3 import PageManage
 from ui.pages.introduction_page import PageFuture
-from config import BASE_PATH
+from config import SOURCE_PATH
 from logger import setup_logger, add_ui_handler, remove_ui_handler, logger as global_logger
 
 class MainWindow(QMainWindow):
@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("爬虫工具 - UI 原型")
 
         self.setMinimumSize(1000, 600)
-        icon_path = BASE_PATH / 'ui' /'momo.ico'
+        icon_path = SOURCE_PATH / 'ui' /'momo.ico'
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
         else:
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     window.show()
 
     # ===== 加载样式表 =====
-    style_path = BASE_PATH / "ui" / "style.css"
+    style_path = SOURCE_PATH / "ui" / "style.css"
 
     try:
         with open(style_path, "r", encoding="utf-8") as f:

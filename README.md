@@ -4,9 +4,7 @@
 
 <div align="center">
 
-
 [功能特性](#功能特性) • [快速开始](#快速开始) • [使用教程](#使用教程) • [常见问题](#常见问题)
-
 
 </div>
 
@@ -16,18 +14,13 @@
 
 ### 主界面
 
-
 ![主界面截图](./assets/screenshot/main.png)
-
 
 ### 批量管理
 
-
 ![批量管理截图](assets/screenshot/manage.png)
 
-
 ### 日志输出
-
 
 ![日志输出截图](assets/screenshot/log.png)
 
@@ -222,7 +215,7 @@ pyinstaller TiebaSpider.spec
 
     <div align="center">
 
-    ** 如果这个项目对你有帮助，请给一个 ⭐ Star！**
+    如果这个项目对你有帮助，请给一个 ⭐ Star！
 
     友情链接：[TiebaArchiver](https://github.com/Sorceresssis/TiebaArchiver)
 
