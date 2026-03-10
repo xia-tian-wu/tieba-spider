@@ -69,7 +69,7 @@
 #### 1. 克隆项目
 
 ```bash
-git clone https://github.com/你的用户名/TiebaSpider.git
+git clone https://github.com/xia-tian-wu/tieba-spider.git
 cd TiebaSpider
 ```
 
@@ -175,9 +175,9 @@ pyinstaller TiebaSpider.spec
    ### Q: 爬取时遇到"百度安全验证"怎么办？
 
    A: 这是百度的反爬机制，建议：
-8. 增加请求延迟（修改 `config.py`）
-9. 暂停一段时间后再试
-10. 避免短时间内大量爬取
+	1. 增加请求延迟（修改 `config.py`）
+	2. 暂停一段时间后再试
+	3. 避免短时间内大量爬取
 
     ### Q: 楼中楼（回复的回复）能爬取吗？
 
@@ -186,13 +186,14 @@ pyinstaller TiebaSpider.spec
     ### Q: 图片下载失败怎么办？
 
     A: 可用选择重新爬取整个帖子。可能原因：
-11. 图片链接已失效
-12. 网络连接问题
-13. 百度反爬限制
+	1. 图片链接已失效
+	2. 网络连接问题
+	3. 百度反爬限制
 
     ### Q: 可以同时运行多个程序吗？
 
     A: 不建议。程序有单实例保护，多开可能导致数据冲突。
+
 
     ---
 
@@ -201,6 +202,7 @@ pyinstaller TiebaSpider.spec
     本项目采用 [MIT 许可证](LICENSE)
 
     ---
+
 
     ## 致谢
 
