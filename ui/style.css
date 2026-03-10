@@ -1,0 +1,159 @@
+/* 主界面控制 */
+/* * {
+    font-family: "Microsoft YaHei", "SimHei", sans-serif;
+} */
+
+QMainWindow {
+    background-color: #FFFFFF;
+}
+
+/* 按钮 */
+QPushButton {
+    background-color: #4897e7;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 6px 12px;
+    outline: none;
+}
+
+QPushButton:hover {
+    background-color: #3689db;
+    border-color: #adb5bd;
+}
+
+QPushButton:pressed {
+    background-color: #2169b1;
+}
+
+QPushButton#clearLogButton {
+    background-color: #3a5af9; 
+    font-weight: bold;
+    border-radius: 4px; 
+    margin-right: 4px;
+}
+
+
+QPushButton#clearLogButton:hover {
+    background-color: #4232f7; 
+
+}
+
+QPushButton#clearLogButton:pressed {
+    background-color: #260eac; 
+}
+
+/* 输入框 */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    border: 1px solid #f8f9fb;
+    border-radius: 16;
+    padding: 6px;
+    background-color: #B2BBCC;
+}
+
+/* 导航栏样式 */
+QListWidget#navigationList {
+    background-color: rgb(233, 239, 251);
+    border: none;
+    outline: none;
+    border-radius: 8px;
+    border: 1px solid transparent;
+
+    font-size: 12px;
+    font-weight: bold;    
+    text-align: center;      
+}
+
+QListWidget#navigationList::item {
+    background-color: transparent;
+    color: #565B66;
+    border: none;
+    padding: 12px 16px;
+    margin: 2px 4px;
+    border-radius: 6px;
+}
+
+QListWidget#navigationList::item:selected {
+    background-color: rgb(155, 205, 246);
+    color: rgb(34, 73, 83);
+    border: none;
+    border-radius: 6px;
+}
+
+QListWidget#navigationList::item:hover {
+    color: rgb(197, 178, 249);
+    background-color: #e1e5ed;
+    border-radius: 6px;
+}
+
+
+/* 帖子列表样式 */
+QListWidget#postsList {
+    background-color: #8697b5;
+    border: none;
+    outline: none;
+    border-radius: 8px;
+    border: 1px solid transparent;
+
+    font-size: 12px;
+    font-weight: normal;    
+    text-align: left;      
+}
+
+/* checkbox样式 */
+QCheckBox {
+    color: #9bcdf6;
+}
+
+QWidget#searchWidget {
+    background-color: transparent;
+    border-radius: 4px;
+}
+QComboBox#typeFilterCombo {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: #606265;
+    border: none;
+}
+
+QComboBox#typeFilterCombo::drop-down {
+    border: none;
+    background-color: transparent;
+}
+/* QComboBox#typeFilterCombo::down-arrow {
+    image: url(down_arrow.png);
+} */
+
+QComboBox#typeFilterCombo QAbstractItemView {
+    background-color: #868f98; /* 菜单背景和主控件一致 */
+    color: white; /* 菜单文字颜色 */
+    outline: none; /* 移除选中项的外边框 */
+    margin: 0px; 
+    border-radius: 4px;
+}
+
+QMenu#postMenu {
+    background-color: #495057; /* 你原有的中灰色背景 */
+    border-radius: 4px;        /* 适当的圆角（可根据需求调整为6/10px） */
+    border: none;              /* 移除默认边框，避免圆角处有突兀的线条 */
+    padding: 4px 0;            /* 上下内边距，让菜单项和菜单边缘有间距 */
+    color: #F8F9FA;            /* 菜单文字颜色（浅灰/白色，保证可读性） */
+}
+
+/* 菜单项基础样式 - 控制内边距和间距 */
+QMenu#postMenu::item {
+    padding: 6px 24px 6px 16px; /* 上下6px，左右16/24px，保证点击区域足够 */
+    margin: 2px 4px;            /* 菜单项之间的间距，避免挤在一起 */
+    border-radius: 4px;         /* 菜单项自身的小圆角，和菜单整体呼应 */
+}
+
+/* 鼠标悬浮/选中样式 - 更深的灰色背景 */
+QMenu#postMenu::item:selected {
+    background-color: #343A40; /* 比#495057更深的炭灰色，视觉对比明显 */
+    color: #FFFFFF;            /* 悬浮时文字变白，提升对比度 */
+}
+
+QMenu#postMenu::separator {
+    height: 1px;
+    background-color: #5C636A; /* 比菜单背景稍浅的灰色，不突兀 */
+    margin: 4px 8px;           /* 分隔线和菜单边缘的间距 */
+}

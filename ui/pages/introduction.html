@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;  /* 全局淡蓝灰色背景 */
+            padding: 15px;
+        }
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            padding: 10px 0 20px;
+            border-bottom: 1px solid #eaeaea;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .version {
+            color: #7f8c8d;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        /* 章节样式 */
+        .section {
+            margin-bottom: 30px;
+            background-color: #f5f7fa;  /* 章节淡蓝灰色背景 */
+            padding: 5px;
+        }
+        .section h2 {
+            color: #3498db;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .section p {
+            margin-bottom: 12px;
+            color: #555;
+        }
+        .section ul {
+            padding-left: 24px;
+            margin: 12px 0;
+        }
+        .section li {
+            margin-bottom: 8px;
+            color: #444;
+        }
+        .section li b {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        /* 替代grid布局 */
+        .guide-table {
+            width: 100%;
+            border-spacing: 15px;  /* 替代原grid的gap */
+            margin-top: 20px;
+        }
+        .guide-table td {
+            width: 50%;
+            vertical-align: top;
+        }
+        /* 操作指南卡片 */
+        .guide-card {
+            padding: 20px;
+            background-color: #f5f7fa;  /* 卡片淡蓝灰色背景 */
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        .guide-card h3 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        /* 相关链接区域 */
+        .links {
+            background-color: #f5f7fa;  /* 淡蓝灰色背景 */
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+        .links h3 {
+            color: #27ae60;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .links p {
+            margin-bottom: 6px;
+        }
+        /* 统一黄色提示区域 */
+        .note-box {
+            margin-top: 30px;
+            padding: 20px;
+
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+        .note-box h3 {
+            color: #f39c12;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .note-item {
+            margin-bottom: 10px;
+            color: #7d6608;
+        }
+        .note-item b {
+            color: #d35400;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <div class="header">
+        <h1>爬虫工具 v1.0</h1>
+        <div class="version">贴吧内容归档与管理工具</div>
+    </div>
+    
+    <!-- 项目介绍 -->
+    <div class="section">
+        <h2>项目介绍</h2>
+        <p>这是一个由语言<b>Python</b>开发，依赖 <b>asyncio, httpx, PySide6</b> 的贴吧爬虫与帖子管理工具</p>
+        <p>开发的初心是为了及时存档自己喜欢的帖子，尤其是贴吧审核越收紧的当下</p>
+        
+        <div class="features">
+            <div class="feature-item">
+                <b>核心价值</b>：提供稳定可靠的贴吧内容本地化存档方案，避免因帖子被删除、屏蔽等导致的信息丢失。
+            </div>
+            <div class="feature-item">
+                <b>设计理念</b>：在保证爬取效率与准确性的同时，提供简洁直观的用户界面，降低技术使用门槛。
+            </div>
+        </div>
+    </div>
+    
+    <!-- 操作指南 - 表格替代grid布局 -->
+    <div class="section">
+        <h2>简要操作指南</h2>
+        <p>工具分为两个核心模块：<b>爬取</b>与<b>管理</b>，分别对应内容的获取与本地帖子操作。</p>
+        
+        <table class="guide-table">
+            <tr>
+                <!-- 爬取模块 -->
+                <td>
+                    <div class="guide-card">
+                        <h3>爬取模块</h3>
+                        <ul>
+                            <li>在左侧导航栏选择 <b>爬取</b> 页面</li>
+                            <li>输入目标帖子的完整链接，链接可通过<b>浏览器地址栏复制</b>或<b>鼠标右键菜单的复制链接功能</b>获得</li>
+                            <li>根据需求勾选<b>只看楼主</b>选项，以过滤其他用户的回复</li>
+                            <li>点击 <b>开始爬取</b> 按钮启动抓取进程</li>
+                            <li><b>测试URL</b>功能用于验证输入链接是否为有效的贴吧帖子地址</li>
+                            <li>右侧日志区域实时显示爬取状态、进度及可能的错误信息</li>
+                            <li>保存格式为<a href="https://markdown.com.cn/intro.html#markdown" target="_blank">Markdown</a>，最终结果不包含任贴吧表情和楼中楼回复</li>
+                        </ul>
+                    </div>
+                </td>
+                <!-- 管理模块 -->
+                <td>
+                    <div class="guide-card">
+                        <h3>管理模块</h3>
+                        <ul>
+                            <li>在左侧导航栏选择 <b>管理</b> 页面</li>
+                            <li>可对已存档的帖子执行三种核心操作：<b>增量爬取</b>（获取新回复）、<b>重新爬取</b>（覆盖更新）、<b>删除</b>（移除存档）</li>
+                            <li>在帖子条目上点击右键，可调出上下文菜单，提供<b>打开本地浏览</b>、<b>复制链接</b>等操作</li>
+                            <li><b>批量模式</b>下，可勾选多个帖子进行统一操作</li>
+                            <li>提供按模式、关键字搜索帖子</li>
+                            <li>请确保本地安装支持 Markdown 渲染的编辑器（如 <b>VS Code</b>、<b>Obsidian</b>），并将其设置为.md 格式文件的默认打开程序。</li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- 统一黄色提示区域 - 整合问题反馈/反馈内容/使用须知 -->
+    <div class="note-box">
+        <h3>注意事项</h3>
+        <div class="note-item">
+            <b>问题反馈</b>：如果在使用过程中遇到任何错误或问题，请通过下方链接联系开发者。
+        </div>
+        <div class="note-item">
+            <b>反馈内容</b>：请尽可能提供完整的错误截图、日志信息、以及问题复现步骤，这将极大帮助快速定位与解决问题。
+        </div>
+        <div class="note-item">
+            <b>使用须知</b>：请遵守相关网站的使用条款，尊重内容版权，仅将本工具用于个人学习与研究目的。
+        </div>
+    </div>
+        
+    <!-- 相关链接 -->
+    <div class="links">
+        <h3>相关链接</h3>
+        <p>• <a href="https://github.com/xia-tian-wu/TiebaSpider" target="_blank">GitHub 项目仓库</a> - 获取使用步骤、最新源代码、提交问题或参与开发</p>
+        <p>• <a href="https://docs.python.org/3/" target="_blank">Python 官方文档</a> - 在这个帖子内查看更详细的教程</p>
+    </div>
+</body>
+</html>
