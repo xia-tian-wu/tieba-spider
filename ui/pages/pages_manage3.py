@@ -8,10 +8,11 @@ from PySide6.QtWidgets import (
     QAbstractItemView, QMenu, QApplication, QComboBox, QLineEdit
 )
 from PySide6.QtCore import Qt, Signal, QThread, QSize, Slot
-from PySide6.QtGui import QContextMenuEvent, QCursor, QAction, QGuiApplication
+from PySide6.QtGui import QContextMenuEvent, QCursor, QAction, QGuiApplication, QMouseEvent
 from spider.index_manage import IndexManager
 from spider.utils import json_to_md_path
 from ui.pages.functions.async_worker import AsyncWorker
+from ui.pages.markdown_viewer_page import MarkdownViewerWindow
 from logger import logger
 import asyncio
 import os
@@ -24,6 +25,7 @@ class ManageItemWidget(QWidget):
     recrawl_requested = Signal(str)
     delete_requested = Signal(str)
     selection_changed = Signal(str, bool)  # 用于批量模式
+    open_in_viewer_requested = Signal(str, str)  # file_path, display_name
 
     def __init__(self, post_key: str, display_name: str, url: str, file_path: str, parent=None):
         super().__init__(parent)
@@ -80,6 +82,13 @@ class ManageItemWidget(QWidget):
         self.setLayout(self._hlayout)
         self.setFixedHeight(40)
         self.set_batch_mode(False)
+
+    def mousePressEvent(self, event: QMouseEvent):
+        """处理鼠标点击事件"""
+        if event.button() == Qt.LeftButton:
+            # 左键点击：打开 Markdown 阅读器（独立窗口）
+            self.open_in_viewer_requested.emit(self.file_path, self.display_name)
+        super().mousePressEvent(event)
 
     def contextMenuEvent(self, event):
         # 创建菜单
@@ -199,6 +208,7 @@ class PageManage(QWidget):
         self.index_manager = IndexManager()
         self.progress_mgr = main_window.global_progress_mgr if main_window else None
         self.is_task_running = False  # 全局任务锁
+        self.viewer_window = None  # Markdown 阅读器窗口实例
 
         self.init_ui()
         # 初始化时加载帖子列表
@@ -341,6 +351,7 @@ class PageManage(QWidget):
                     item_widget.recrawl_requested.connect(self.handle_recrawl)
                     item_widget.delete_requested.connect(self.handle_delete)
                     item_widget.selection_changed.connect(self.on_item_selected)
+                    item_widget.open_in_viewer_requested.connect(self.open_markdown_in_viewer)
                     item_widget.set_batch_mode(current_batch_mode)
 
                     item = QListWidgetItem()
@@ -392,7 +403,39 @@ class PageManage(QWidget):
     def clear_search(self):
         """清空搜索框"""
         self.search_input.clear()
-    
+
+    def open_markdown_in_viewer(self, file_path: str, display_name: str):
+        """在独立窗口中打开 Markdown 阅读器"""
+        from spider.utils import json_to_md_path
+        
+        md_path = Path(json_to_md_path(file_path))
+        if not md_path.exists():
+            # 尝试从 data/posts 路径转换
+            md_path = Path(file_path.replace(".json", ".md").replace("posts", "markdowns"))
+        
+        if not md_path.exists():
+            QMessageBox.warning(
+                self, 
+                "文件不存在", 
+                f"找不到 Markdown 文件：\n{md_path}\n\n请确保帖子已正确爬取并保存。"
+            )
+            return
+        
+        # 创建或获取阅读器窗口
+        if self.viewer_window is None:
+            self.viewer_window = MarkdownViewerWindow(self)
+        
+        # 打开文件
+        self.viewer_window.open_markdown(md_path, display_name)
+        
+        # 显示窗口（如果已关闭）
+        if not self.viewer_window.isVisible():
+            self.viewer_window.show()
+        
+        # 激活窗口
+        self.viewer_window.activateWindow()
+        self.viewer_window.raise_()
+
     def on_page_switched(self, page_index: int):
         """主窗口切换页面时触发：切到管理页（索引1）则刷新"""
         if page_index == 1:  # 管理页是第二个（索引1）
