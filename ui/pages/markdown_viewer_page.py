@@ -27,6 +27,33 @@ class MarkdownViewerWindow(QMainWindow):
         self.tab_widget.setTabsClosable(True)  # 启用标签页关闭按钮
         self.tab_widget.tabCloseRequested.connect(self.close_tab)
         self.tab_widget.setDocumentMode(True)  # 更简洁的标签页样式
+        self.tab_widget.setStyleSheet("""
+    QTabBar {
+    background-color: #f5f5f5;
+    }
+    QTabWidget::pane {
+        border: 1px solid #d0d0d0;
+        background-color: white;
+    }
+    QTabBar::tab {
+        background-color: #e0e0e0;
+        color: #555555;
+        padding: 8px 16px;
+        margin-right: 2px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        min-width: 120px;
+    }
+    QTabBar::tab:selected {
+        background-color: #d0d0d0;
+        color: #333333;
+        font-weight: bold;
+    }
+    QTabBar::tab:hover:!selected {
+        background-color: #d0d0d0;
+    }
+
+""")
 
         layout.addWidget(self.tab_widget)
 

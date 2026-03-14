@@ -455,6 +455,25 @@ body.dark-mode .moon-icon {{
     padding: 6px 12px;
     border-radius: 4px;
 }}
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {{
+    width: 10px;
+    height: 10px;
+}}
+::-webkit-scrollbar-track {{
+    background: #e6e6e6;
+    border-radius: 5px;
+}}
+::-webkit-scrollbar-thumb {{
+    background: #888;
+    border-radius: 5px;
+    /* 可选：给滑块加一点点透明，更柔和 */
+    opacity: 0.8;
+}}
+::-webkit-scrollbar-thumb:hover {{
+    background: #555;
+    opacity: 1;
+}}
 
 </style>
 </head>
