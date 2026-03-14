@@ -70,7 +70,7 @@
 
 ```bash
 git clone https://github.com/xia-tian-wu/tieba-spider.git
-cd TiebaSpider
+cd tieba-spider
 ```
 
 #### 2. 安装依赖
@@ -175,52 +175,51 @@ pyinstaller TiebaSpider.spec
    ### Q: 爬取时遇到"百度安全验证"怎么办？
 
    A: 这是百度的反爬机制，建议：
-	1. 增加请求延迟（修改 `config.py`）
-	2. 暂停一段时间后再试
-	3. 避免短时间内大量爬取
 
-    ### Q: 楼中楼（回复的回复）能爬取吗？
+   1. 增加请求延迟（修改 `config.py`）
+   2. 暂停一段时间后再试
+   3. 避免短时间内大量爬取
 
-    A: 当前版本暂不支持楼中楼爬取。该功能需要额外的 API 接口分析，将在未来版本中考虑添加。
+   ### Q: 楼中楼（回复的回复）能爬取吗？
 
-    ### Q: 图片下载失败怎么办？
+   A: 当前版本暂不支持楼中楼爬取。该功能需要额外的 API 接口分析，将在未来版本中考虑添加。
 
-    A: 可用选择重新爬取整个帖子。可能原因：
-	1. 图片链接已失效
-	2. 网络连接问题
-	3. 百度反爬限制
+   ### Q: 图片下载失败怎么办？
 
-    ### Q: 可以同时运行多个程序吗？
+   A: 可用选择重新爬取整个帖子。可能原因：
 
-    A: 不建议。程序有单实例保护，多开可能导致数据冲突。
+   1. 图片链接已失效
+   2. 网络连接问题
+   3. 百度反爬限制
 
+   ### Q: 可以同时运行多个程序吗？
 
-    ---
+   A: 不建议。程序有单实例保护，多开可能导致数据冲突。
 
-    ## 许可证
+   ---
 
-    本项目采用 [MIT 许可证](LICENSE)
+   ## 许可证
 
-    ---
+   本项目采用 [MIT 许可证](LICENSE)
 
+   ---
 
-    ## 致谢
+   ## 致谢
 
-    这是一个完全由AI糊泥巴出来的项目，虽然有些晚，但至少对我够用了。
+   这是一个完全由AI糊泥巴出来的项目，虽然有些晚，但至少对我够用了。
 
-    AI：ChatGPT, Gemini, DeepSeek,Qwen, Doubao（贡献不分先后）
+   AI：ChatGPT, Gemini, DeepSeek,Qwen, Doubao（贡献不分先后）
 
-    人：xia-tian-wu
+   人：xia-tian-wu
 
-    ---
+   ---
 
+   <div align="center">
 
-    <div align="center">
+   如果这个项目对你有帮助，请给一个 ⭐ Star！
 
-    如果这个项目对你有帮助，请给一个 ⭐ Star！
+   友情链接：[TiebaArchiver](https://github.com/Sorceresssis/TiebaArchiver)
 
-    友情链接：[TiebaArchiver](https://github.com/Sorceresssis/TiebaArchiver)
+   如果希望用完全不丢失格式和楼中楼，贴吧表情等方式保存帖子，试试TiebaArchiver，不过部署, 配置和使用会稍微麻烦些。
 
-    如果希望用完全不丢失格式和楼中楼，贴吧表情等方式保存帖子，试试TiebaArchiver，不过部署, 配置和使用会稍微麻烦些。
-
-    </div>
+   </div>

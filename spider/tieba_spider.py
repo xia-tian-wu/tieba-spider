@@ -434,17 +434,28 @@ class TiebaSpider:
 
         all_floors: List[FloorData] = []
 
-        # 获取第一页
-        response = await self._get_response(normalized_url)
-        # response.encoding = 'utf-8' 
-        soup = BeautifulSoup(response.content, 'lxml')
-        if not response or response.status_code != 200:
-            logger.warning(f"获取页面失败：{normalized_url}")
-            raise ex.NetworkError("请求失败或响应无效", url=normalized_url)
-
-        if not self.is_valid_post_page(soup):
+        max_validation_retries = 3
+        for attempt in range(1, max_validation_retries):
+            response = await self._get_response(normalized_url)
+            soup = BeautifulSoup(response.content, 'lxml')
+            
+            if response.status_code != 200:
+                logger.warning(f"获取页面失败（第 {attempt} 次）: {normalized_url}")
+                if attempt < max_validation_retries - 1:
+                    await self.wait_before_next_request()
+                    continue
+                raise ex.NetworkError("请求失败或响应无效", url=normalized_url)
+            
+            if self.is_valid_post_page(soup):
+                break  # 验证成功
+            
+            logger.warning(f"帖子验证失败（第 {attempt} 次），重试中...: {normalized_url}")
+            if attempt < max_validation_retries - 1:
+                await self.wait_before_next_request()
+        else:
+            # 所有重试都失败
             logger.warning(f"帖子无效（被隐藏/已删除/不存在）: {normalized_url}")
-            return None  # 不保存无效数据
+            return None
 
         bar_elem = soup.find('a', class_='card_title_fname')
         bar_name = bar_elem.get_text(strip=True) if bar_elem else ''
@@ -718,7 +729,6 @@ class TiebaSpider:
 
         # 获取当前帖子首页信息
         response = await self._get_response(normalized_url)
-        # response.encoding = 'utf-8'
         current_soup = BeautifulSoup(response.content, 'lxml')
         if not self.is_valid_post_page(current_soup):
             logger.warning(f"帖子已失效（被隐藏或删除），跳过更新: {normalized_url}")
