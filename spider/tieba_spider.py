@@ -739,6 +739,11 @@ class TiebaSpider:
         # 提取历史数据
         history_max_page_number = history_post_data.get('total_pages', 1)
         history_max_floor_number = history_post_data.get('max_floor_number', 0)
+        recorded_images_dir = history_post_data.get('images_dir', '')
+        present_images_dir = self.get_image_path(current_see_lz, post_id=post_id)
+        if recorded_images_dir and recorded_images_dir != present_images_dir:
+            logger.info(f"检测到图片目录变更，更新历史记录中的图片目录路径;{present_images_dir}")
+            history_post_data['images_dir'] = present_images_dir
 
         new_floors: List[FloorData] = []  # 用于存储新增楼层
 
@@ -945,12 +950,11 @@ class TiebaSpider:
 
                 filename = self.get_image_filename(img_url)
                 save_path = os.path.join(save_dir, filename)
-
                 # 写文件是阻塞操作，但图片小，可接受；若需更高性能可用 aiofiles
                 with open(save_path, 'wb') as f:
                     f.write(response.content)
                 return save_path
-
+            
             except Exception as e:
                 if attempt == max_retries - 1:
                     logger.warning(f"图片下载失败：{img_url}，错误：{e}")
@@ -979,8 +983,7 @@ class TiebaSpider:
                 - `images_downloaded` (int): 成功下载的图片总数
                 - `images_dir` (str): 图片存储目录路径
         """
-        mode_suffix = 'see_lz' if post_data['see_lz'] else 'full'
-        save_dir = os.path.join(IMAGES_DIR, f"{post_id}_{mode_suffix}")
+        save_dir = self.get_image_path(post_data['see_lz'], post_id)
         os.makedirs(save_dir, exist_ok=True)
         
         all_urls = [img for floor in post_data['floors'] for img in floor['images']]
@@ -1050,6 +1053,11 @@ class TiebaSpider:
         if '?' in img_url:
             img_url = img_url.split('?')[0]
         return os.path.basename(img_url)
+    
+    def get_image_path(self, mode: bool, post_id: str) -> str:
+        mode_suffix = 'see_lz' if mode else 'full'
+        save_dir = os.path.join(IMAGES_DIR, f"{post_id}_{mode_suffix}")
+        return save_dir
     
     def _find_existing_image_path(self, post_data: PostData, target_url: str) -> str | None:
         """

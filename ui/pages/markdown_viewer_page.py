@@ -8,7 +8,7 @@ class MarkdownViewerWindow(QMainWindow):
     """Markdown 阅读器窗口 - 独立窗口，支持多标签页管理"""
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(None)
         self.setWindowTitle("帖子阅读器")
         self.resize(1200, 800)
         self.viewers = {}  # tab_id -> MarkdownViewer
