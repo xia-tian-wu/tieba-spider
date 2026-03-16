@@ -12,17 +12,33 @@
 
 ## 截图预览
 
-### 主界面
+### 主界面 
 
 ![主界面截图](./assets/screenshot/main.png)
 
-### 批量管理
+### 批量管理 
 
 ![批量管理截图](assets/screenshot/manage.png)
 
-### 日志输出
+### 勾选和菜单 
+
+![批量管理截图](assets/screenshot/batch.png)
+
+### 日志输出 
 
 ![日志输出截图](assets/screenshot/log.png)
+
+### 白天模式
+
+![日志输出截图](assets/screenshot/day_mode.png)
+
+### 夜间模式
+
+![日志输出截图](assets/screenshot/night_mode.png)
+
+### 图片浏览
+
+![日志输出截图](assets/screenshot/pic_edit.png)
 
 ---
 
@@ -36,6 +52,7 @@
 * **只看楼主**：支持筛选楼主发言
 * **图片下载**：自动下载帖子中的所有图片
 * **Markdown格式**：自动生成格式化的 Markdown 文档
+* **阅读浏览**：纯净阅读体验与模式切换
 
 ### 管理功能
 

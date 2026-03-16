@@ -96,7 +96,7 @@ class ManageItemWidget(QWidget):
         menu.setObjectName('postMenu')
         
         # 添加“打开本地文件”
-        open_file_action = QAction("在阅读器中打开Markdown", self)
+        open_file_action = QAction("在默认阅读器中打开Markdown", self)
         open_file_action.triggered.connect(self.open_markdown)
         menu.addAction(open_file_action)
         

@@ -1,4 +1,8 @@
 beautifulsoup4==4.14.3
 fake_useragent==2.2.0
 httpx==0.28.1
-PySide6==6.10.2
+pyside6==6.9.3
+pyside6_addons==6.9.3
+pyside6_essentials==6.9.3
+h2==4.3.0
+lxml==6.0.2

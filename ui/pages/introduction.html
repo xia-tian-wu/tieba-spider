@@ -21,7 +21,7 @@
         .header {
             text-align: center;
             padding: 10px 0 20px;
-            border-bottom: 1px solid #eaeaea;
+            border-bottom: 1px solid #bda9a9;
             margin-bottom: 20px;
         }
         .header h1 {
@@ -182,7 +182,7 @@
                             <li>在帖子条目上点击右键，可调出上下文菜单，提供<b>打开本地浏览</b>、<b>复制链接</b>等操作</li>
                             <li><b>批量模式</b>下，可勾选多个帖子进行统一操作</li>
                             <li>提供按模式、关键字搜索帖子</li>
-                            <li>请确保本地安装支持 Markdown 渲染的编辑器（如 <b>VS Code</b>、<b>Obsidian</b>），并将其设置为.md 格式文件的默认打开程序。</li>
+                            <li>支持<b>左键点击帖子</b>直接打开浏览，也兼容使用本地默认 Markdown 渲染的编辑器（如 <b>VS Code</b>、<b>Obsidian</b>）</li>
                         </ul>
                     </div>
                 </td>
@@ -193,6 +193,12 @@
     <!-- 统一黄色提示区域 - 整合问题反馈/反馈内容/使用须知 -->
     <div class="note-box">
         <h3>注意事项</h3>
+        <div class="note-item">
+            <b>爬取说明</b>：初次使用，可能遇到频繁的删除/不存在，可以手动打开链接查看。
+        </div>
+        <div class="note-item">
+            <b>验证拦截</b>：请勿一次性爬取大量帖子。如被多次拦截，请停止使用任何爬取功能，等待若干小时。
+        </div>
         <div class="note-item">
             <b>问题反馈</b>：如果在使用过程中遇到任何错误或问题，请通过下方链接联系开发者。
         </div>
@@ -208,7 +214,7 @@
     <div class="links">
         <h3>相关链接</h3>
         <p>• <a href="https://github.com/xia-tian-wu/tieba-spider" target="_blank">GitHub 项目仓库</a> - 获取使用步骤、最新源代码、提交问题或参与开发</p>
-        <p>• <a href="https://docs.python.org/3/" target="_blank">Python 官方文档</a> - 在这个帖子内查看更详细的教程</p>
+        <p>• <a href="https://tieba.baidu.com/p/10560556235" target="_blank">介绍用帖子</a> - 在这个帖子内查看更详细的教程</p>
     </div>
 </body>
 </html>

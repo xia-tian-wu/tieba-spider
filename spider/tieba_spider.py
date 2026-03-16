@@ -1,6 +1,7 @@
 import sys
 import os
 import shutil
+from pathlib import Path
 
 # 项目核心常量/路径
 from config import (
@@ -925,7 +926,7 @@ class TiebaSpider:
         
         return result_map
     
-    async def download_image(self, img_url: str, save_dir: str, post_id: str) -> None | str:
+    async def download_image(self, img_url: str, save_dir: str, post_id: str) -> None | str | Path:
         """
         异步下载单张图片，支持重试机制和反爬Referer头。
         
@@ -950,11 +951,10 @@ class TiebaSpider:
 
                 filename = self.get_image_filename(img_url)
                 save_path = os.path.join(save_dir, filename)
-                # 写文件是阻塞操作，但图片小，可接受；若需更高性能可用 aiofiles
                 with open(save_path, 'wb') as f:
                     f.write(response.content)
                 return save_path
-            
+                            
             except Exception as e:
                 if attempt == max_retries - 1:
                     logger.warning(f"图片下载失败：{img_url}，错误：{e}")

@@ -1,7 +1,7 @@
 import os
 import re
 import json
-
+from pathlib import Path
 from config import MARKDOWN_DIR, IMAGES_DIR
 from spider.type_models import PostData
 

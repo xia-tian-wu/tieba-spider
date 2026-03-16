@@ -2,6 +2,7 @@ from itertools import takewhile
 from fake_useragent import UserAgent
 import re
 import os
+from pathlib import Path
 
 def normalize_url(url: str, see_lz: bool) -> str | None:
     """
@@ -126,7 +127,7 @@ def get_safe_filename(post_id: str, see_lz: bool, title: str = "") -> str:
     else:
         return f"{base_name}.json"
     
-def json_to_md_path(json_flie_path: str) -> str:
+def json_to_md_path(json_flie_path: str | Path) -> Path:
     """将单个帖子 JSON 文件 路径转换为 Markdown 文件路径。
     
     Args:
@@ -135,7 +136,6 @@ def json_to_md_path(json_flie_path: str) -> str:
     Returns:
         生成的 Markdown 文件路径：如 'data/markdowns/安全标题_7833341768_see_lz.md'
     """
-    json_filename = os.path.basename(json_flie_path)
-    md_filename = json_filename.replace(".json", ".md")
-    md_full_path = os.path.join("data", "markdowns", md_filename)
-    return md_full_path
+    json_path = Path(json_flie_path)
+    md_path_obj = json_path.with_suffix(".md") 
+    return Path("data") / "markdowns" / md_path_obj.name
