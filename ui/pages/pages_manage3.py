@@ -85,7 +85,7 @@ class ManageItemWidget(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent):
         """处理鼠标点击事件"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             # 左键点击：打开 Markdown 阅读器（独立窗口）
             self.open_in_viewer_requested.emit(self.file_path, self.display_name)
         super().mousePressEvent(event)

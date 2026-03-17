@@ -2,6 +2,7 @@ import asyncio
 from PySide6.QtCore import Signal, QObject, QMetaObject, Qt
 from logger import logger
 from spider.tieba_spider import TiebaSpider
+from spider import exceptions as ex
 
 class AsyncWorker(QObject):
     """处理异步任务：同时支持新帖爬取和旧帖更新（并发处理）"""
@@ -81,7 +82,25 @@ class AsyncWorker(QObject):
                 'status': 'success' if result else 'failed',
                 'data': result
             }
+        except ex.InvalidURLError as e:
+            logger.error(f"【URL 错误】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ URL 格式错误\n\n{e.url}\n\n请检查链接是否正确")
+            return {'url': url, 'status': 'error', 'error': f"URL 错误：{e.message}"}
+        except ex.NetworkError as e:
+            logger.error(f"【网络错误】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ 网络请求失败\n\n{e.url}\n\n请检查网络连接后重试")
+            return {'url': url, 'status': 'error', 'error': f"网络错误：{e.message}"}
+        except ex.ParseError as e:
+            logger.error(f"【解析错误】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ 页面解析失败\n\n{e.url}\n\n可能是贴吧更新了页面结构")
+            return {'url': url, 'status': 'error', 'error': f"解析错误：{e.message}"}
+        except ex.PostNotFoundError as e:
+            logger.error(f"【帖子不存在】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ 帖子不存在或已被删除")
+            return {'url': url, 'status': 'error', 'error': f"帖子不存在：{e.message}"}
         except Exception as e:
+            logger.error(f"【未知错误】{type(e).__name__}: {e}")
+            self.error.emit(f"❌ 发生未知错误:\n{str(e)}")
             return {'url': url, 'status': 'error', 'error': str(e)}
 
     async def _update_existing(self, url):
@@ -95,5 +114,27 @@ class AsyncWorker(QObject):
                 'status': 'updated' if result else 'skipped',
                 'data': result
             }
+        except ex.InvalidURLError as e:
+            logger.error(f"【URL 错误】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ URL 格式错误\n\n{e.url}\n\n请检查链接是否正确")
+            return {'url': url, 'status': 'error', 'error': f"URL 错误：{e.message}"}
+        except ex.NetworkError as e:
+            logger.error(f"【网络错误】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ 网络请求失败\n\n{e.url}\n\n请检查网络连接后重试")
+            return {'url': url, 'status': 'error', 'error': f"网络错误：{e.message}"}
+        except ex.ParseError as e:
+            logger.error(f"【解析错误】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ 页面解析失败\n\n{e.url}\n\n可能是贴吧更新了页面结构")
+            return {'url': url, 'status': 'error', 'error': f"解析错误：{e.message}"}
+        except ex.PostNotFoundError as e:
+            logger.error(f"【帖子不存在】{e.message} | URL: {e.url}")
+            self.error.emit(f"❌ 帖子不存在或已被删除")
+            return {'url': url, 'status': 'error', 'error': f"帖子不存在：{e.message}"}
+        except ex.FileIndexError as e:
+            logger.error(f"【文件错误】{e.message}")
+            self.error.emit(f"❌ 索引文件错误\n\n请重试或手动修复索引文件")
+            return {'url': url, 'status': 'error', 'error': f"文件错误：{e.message}"}
         except Exception as e:
+            logger.error(f"【未知错误】{type(e).__name__}: {e}")
+            self.error.emit(f"❌ 发生未知错误:\n{str(e)}")
             return {'url': url, 'status': 'error', 'error': str(e)}
