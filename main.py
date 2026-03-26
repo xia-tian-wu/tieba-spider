@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal, QSharedMemory
 from PySide6.QtGui import QPalette, QColor, QIcon
-from spider.tieba_spider import TiebaSpider
+from spider.re_spider import TiebaSpider
 
 from ui.pages.pages_crawl import PageCrawl
 from ui.pages.functions.progress_manager import TaskProgressManager

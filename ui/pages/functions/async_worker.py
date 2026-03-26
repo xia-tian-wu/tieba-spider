@@ -1,27 +1,46 @@
 import asyncio
-from PySide6.QtCore import Signal, QObject, QMetaObject, Qt
+from PySide6.QtCore import Signal, QObject
 from logger import logger
-from spider.tieba_spider import TiebaSpider
+from spider.re_spider import TiebaSpider
 from spider import exceptions as ex
 
+
 class AsyncWorker(QObject):
-    """处理异步任务：同时支持新帖爬取和旧帖更新（并发处理）"""
-    finished = Signal(list)  # 返回 [{url, status, data/error}, ...]
-    error = Signal(str)      # 全局错误信息
-    progress = Signal(str)   # 进度提示
+    """
+    异步任务处理器：适配 re_spider 的批量爬取接口
+
+    工作流程：
+    1. 在 QThread 中运行 asyncio 事件循环
+    2. 调用 TiebaSpider.crawl_multi_posts() 批量处理所有 URL
+    3. 爬取完成后清理客户端资源
+    4. 通过信号返回结果到 UI 线程
+    """
+    finished = Signal(list)      # 返回 [{url, status, data/error}, ...]
+    error = Signal(str)          # 全局错误信息
+    progress = Signal(str)       # 进度提示
     task_completed = Signal(str, str)  # url, task_type
 
-    def __init__(self, new_urls=None, update_urls=None):
+    def __init__(self, new_urls=None, update_urls=None, recrawl_urls=None):
+        """
+        初始化异步工作器
+
+        Args:
+            new_urls: 新帖子 URL 列表
+            update_urls: 需更新的帖子 URL 列表（增量更新）
+            recrawl_urls: 需重新爬取的帖子 URL 列表（强制重爬）
+        """
         super().__init__()
-        self.spider = TiebaSpider()
+        self.spider: TiebaSpider | None = None
         self.new_urls = new_urls or []
         self.update_urls = update_urls or []
+        self.recrawl_urls = recrawl_urls or []
 
     def run_async_task(self):
-        """运行异步任务"""
+        """运行异步任务（在 QThread 中调用）"""
         try:
+            # 创建新的事件循环（每个线程独立）
             results = asyncio.run(self._run_crawl())
-            # 清理爬虫对象
+            # 清理爬虫客户端
             self._cleanup_spider()
             # 发送完成信号
             self.finished.emit(results)
@@ -31,47 +50,59 @@ class AsyncWorker(QObject):
             self.error.emit(str(e))
 
     def _cleanup_spider(self):
-        """清理 spider 对象"""
-        if hasattr(self, 'spider') and self.spider:
-            try:
-                # 只清理 httpx 客户端，不清理锁（避免跨线程问题）
-                if self.spider.client and not self.spider.client.is_closed:
-                    # 注意：这里不能 await，因为不在异步上下文中
-                    # 所以只是将客户端引用置为 None，让 Python GC 处理
-                    self.spider.client = None
-            except Exception as e:
-                logger.error(f"清理爬虫客户端失败：{e}")
-            finally:
-                self.spider = None
+        """清理爬虫对象（非异步，仅置空引用）"""
+        if self.spider is not None:
+            # 注意：这里不能 await，因为不在异步上下文中
+            # 客户端清理已在 _run_crawl 的 finally 中完成
+            self.spider = None
 
-    async def _run_crawl(self):
-        tasks = []
-        for url in self.new_urls:
-            tasks.append(self._crawl_new(url))
-        for url in self.update_urls:
-            tasks.append(self._update_existing(url))
+    async def _run_crawl(self) -> list:
+        """
+        执行爬取任务的核心逻辑
 
-        if not tasks:
+        Returns:
+            格式化的结果列表 [{url, status, data/error}, ...]
+        """
+        # 合并 URL 列表（re_spider 自动处理去重和增量判断）
+        all_urls = list(set(self.new_urls + self.update_urls + self.recrawl_urls))
+
+        if not all_urls:
             return []
 
-        # 并发执行所有任务，捕获单个任务异常
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # 创建爬虫实例
+        self.spider = TiebaSpider()
 
-        # 格式化结果
-        formatted_results = []
-        for i, res in enumerate(results):
-            if isinstance(res, Exception):
-                formatted_results.append({
-                    'url': self.new_urls[i] if i < len(self.new_urls) else self.update_urls[i - len(self.new_urls)],
-                    'status': 'error',
-                    'error': str(res)
-                })
-            else:
-                formatted_results.append(res)
-        return formatted_results
+        try:
+            # 批量爬取所有帖子
+            results = await self.spider.crawl_multi_posts(
+                urls=all_urls,
+                recrawl_urls=self.recrawl_urls
+            )
 
-    async def _crawl_new(self, url):
-        """处理新链接爬取"""
+            # 发送任务完成信号（用于进度条更新）
+            for result in results:
+                url = result['url']
+                if result['status'] == 'success':
+                    self.task_completed.emit(url, 'crawl')
+                elif result['status'] == 'no_update':
+                    self.task_completed.emit(url, 'update')
+
+            return results
+
+        finally:
+            # 确保客户端被清理（即使在任务执行过程中）
+            await self.spider.cleanup()
+
+    async def _crawl_new(self, url: str) -> dict:
+        """
+        爬取单个新帖子（保留用于兼容）
+
+        Args:
+            url: 帖子 URL
+
+        Returns:
+            爬取结果字典
+        """
         self.progress.emit(f"爬取新帖：{url}")
         try:
             see_lz = 'see_lz=1' in url
@@ -103,11 +134,21 @@ class AsyncWorker(QObject):
             self.error.emit(f"❌ 发生未知错误:\n{str(e)}")
             return {'url': url, 'status': 'error', 'error': str(e)}
 
-    async def _update_existing(self, url):
-        """处理旧链接更新"""
+    async def _update_existing(self, url: str) -> dict:
+        """
+        更新单个旧帖子（保留用于兼容）
+
+        Args:
+            url: 帖子 URL
+
+        Returns:
+            更新结果字典
+        """
         self.progress.emit(f"更新旧帖：{url}")
         try:
-            result = await self.spider.update_existed_post(url)
+            # re_spider 中 crawl_full_post 已自动处理增量更新
+            see_lz = 'see_lz=1' in url
+            result = await self.spider.crawl_full_post(url, see_lz=see_lz)
             self.task_completed.emit(url, 'update')
             return {
                 'url': url,

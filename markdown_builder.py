@@ -5,7 +5,7 @@ from pathlib import Path
 from config import MARKDOWN_DIR, IMAGES_DIR
 from spider.type_models import PostData
 
-def convert_post_json_to_markdown(json_path: str) -> str:
+def convert_post_json_to_markdown(json_path: Path) -> str:
     """
     将单个帖子 JSON 文件转换为 Markdown，并保存到 markdowns/ 下。
     
@@ -32,7 +32,6 @@ def convert_post_json_to_markdown(json_path: str) -> str:
     os.makedirs(MARKDOWN_DIR, exist_ok=True)
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_content)
-    
     return md_path
     
 def _render_markdown_from_post_data(post_data: PostData, image_abs_dir: str) -> str:

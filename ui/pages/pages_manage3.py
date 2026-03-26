@@ -86,8 +86,9 @@ class ManageItemWidget(QWidget):
     def mousePressEvent(self, event: QMouseEvent):
         """处理鼠标点击事件"""
         if event.button() == Qt.MouseButton.LeftButton:
-            # 左键点击：打开 Markdown 阅读器（独立窗口）
-            self.open_in_viewer_requested.emit(self.file_path, self.display_name)
+            # 批量模式下禁用左键打开浏览
+            if not self.is_batch_mode:
+                self.open_in_viewer_requested.emit(self.file_path, self.display_name)
         super().mousePressEvent(event)
 
     def contextMenuEvent(self, event):
@@ -587,7 +588,7 @@ class PageManage(QWidget):
             url = post_info['url']
             
             # 启动异步任务（重新爬取 = 新爬取）
-            self.start_async_task(new_urls=[url], post_keys=[post_key], task_type="recrawl")
+            self.start_async_task(recrawl_urls=[url], post_keys=[post_key], task_type="recrawl")
         except Exception as e:
             logger.error(f"获取帖子信息失败: {e}")
             QMessageBox.critical(self, "错误", f"获取帖子信息失败: {str(e)}")
@@ -695,7 +696,7 @@ class PageManage(QWidget):
                 return
                 
             # 启动异步任务（重新爬取 = 新爬取）
-            self.start_async_task(new_urls=new_urls, post_keys=list(self.selected_keys), task_type="recrawl")
+            self.start_async_task(recrawl_urls=new_urls, post_keys=list(self.selected_keys), task_type="recrawl")
         except Exception as e:
             logger.error(f"批量重新爬取准备失败: {e}")
             QMessageBox.critical(self, "错误", f"批量重新爬取准备失败: {str(e)}")
@@ -757,16 +758,17 @@ class PageManage(QWidget):
                 self.enable_all_controls()
                 self.is_task_running = False
 
-    def start_async_task(self, new_urls=None, update_urls=None, post_keys=None, task_type="update"):
+    def start_async_task(self, new_urls=None, update_urls=None, recrawl_urls=None, post_keys=None, task_type="update"):
         """启动异步任务"""
-        
+
         # 关键：设置新的事件循环，确保线程安全
         asyncio.set_event_loop(asyncio.new_event_loop())
         self.cleanup_worker()
 
         new_urls = new_urls or []
         update_urls = update_urls or []
-        total = len(new_urls) + len(update_urls)
+        recrawl_urls = recrawl_urls or []
+        total = len(new_urls) + len(update_urls) + len(recrawl_urls)
 
         if total == 0:
             return
@@ -777,7 +779,7 @@ class PageManage(QWidget):
 
         # ===== 创建线程 =====
         self.worker_thread = QThread()
-        self.worker = AsyncWorker(new_urls, update_urls)
+        self.worker = AsyncWorker(new_urls, update_urls, recrawl_urls)
         self.worker.moveToThread(self.worker_thread)
 
         # ===== 连接信号 =====
@@ -790,12 +792,12 @@ class PageManage(QWidget):
         
         # 启动任务并更新状态
         self.worker_thread.start()
-        total = len(new_urls or []) + len(update_urls or [])
+        total = len(new_urls or []) + len(update_urls or []) + len(recrawl_urls or [])
 
         # 字典映射：task_type → (任务名, 对应数值)
         task_map = {
             "update": ("增量更新", len(update_urls or [])),
-            "recrawl": ("重新爬取", len(new_urls or []))
+            "recrawl": ("重新爬取", len(recrawl_urls or []))
 
         }
         # 取对应值（默认值防止未知task_type报错）
