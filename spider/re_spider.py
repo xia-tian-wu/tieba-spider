@@ -71,14 +71,14 @@ class TiebaSpider:
 
             self.tb_client = Client()
             await self.tb_client.__aenter__()
-            logger.info("aiotieba 客户端已挂载")
+            # logger.info("aiotieba 客户端已挂载")
 
     async def cleanup(self) -> None:
         """清理客户端资源"""
         if self.tb_client is not None:
             try:
                 await self.tb_client.__aexit__(None, None, None)
-                logger.info("aiotieba 客户端已关闭")
+                # logger.info("aiotieba 客户端已关闭")
             except Exception as e:
                 logger.error(f"清理 aiotieba 客户端失败：{e}")
             finally:
@@ -205,7 +205,7 @@ class TiebaSpider:
             history_max_floor = 0
 
             if not force_recrawl and index_key in index:
-                logger.info(f"检测到历史数据，切换至增量更新模式：{tid}")
+                # logger.info(f"检测到历史数据，切换至增量更新模式：{tid}")
                 history_post_index = index[index_key]
                 history_file_path = self.index_path.parent / history_post_index['file_path']
 
@@ -233,9 +233,10 @@ class TiebaSpider:
                 else:
                     logger.info(f"未找到历史数据，开始全文爬取：{tid}")
 
+            post_sign = history_post_data.get('title') if history_post_data else url
             # 3. 执行爬取
             new_floors, new_images_list, base_info = await self._sync_single_tid(
-                int(tid), start_pn, current_see_lz, history_max_floor
+                int(tid), start_pn, current_see_lz, history_max_floor, post_sign
             )
 
             if not new_floors:
@@ -299,7 +300,8 @@ class TiebaSpider:
         tid: int,
         start_pn: int,
         see_lz: bool,
-        history_max_floor: int
+        history_max_floor: int,
+        post_sign: str
     ) -> Tuple[List[FloorData], List[str], Dict]:
         """
         底层同步原子：从指定页码爬取到最后一页，并过滤旧楼层
@@ -309,6 +311,7 @@ class TiebaSpider:
             start_pn: 起始页码
             see_lz: 是否只看楼主
             history_max_floor: 历史最大楼层号
+            post_sign: 帖子标识（用于日志）
 
         Returns:
             List[FloorData]: 新增楼层列表
@@ -323,6 +326,7 @@ class TiebaSpider:
             raise ex.NetworkError(f"获取帖子失败：{e}", url=f"https://tieba.baidu.com/p/{tid}")
 
         if not self.is_valid_post_page(first_resp):
+            logger.warning(f'《{post_sign}》 帖子可能已被删除或隐藏')
             raise ex.ParseError("帖子页面解析失败，可能帖子不存在或结构已变化", url=f"https://tieba.baidu.com/p/{tid}")
 
         total_page = first_resp.page.total_page
@@ -332,7 +336,7 @@ class TiebaSpider:
         # 处理页数缩减情况
         if start_pn > total_page:
             logger.info(f"检测到页数缩减（{start_pn} -> {total_page}），重置为从第 1 页重新同步")
-            return await self._sync_single_tid(tid, 1, see_lz, 0)
+            return await self._sync_single_tid(tid, 1, see_lz, 0, post_sign)
 
         # 第二步：并发抓取剩余页
         all_pages_resp = [first_resp]
