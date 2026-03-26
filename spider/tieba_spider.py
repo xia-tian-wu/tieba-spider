@@ -22,7 +22,7 @@ import httpx
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs
 
-# 数据处理（通用工具）
+# 数据处理
 import json
 import re
 import random

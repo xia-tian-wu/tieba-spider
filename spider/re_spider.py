@@ -19,9 +19,6 @@ from spider.utils import extract_posts_id, get_safe_filename
 from markdown_builder import convert_post_json_to_markdown
 import spider.exceptions as ex
 
-# BDUSS 配置（保持在文件顶部）
-BDUSS = 'hSdHYzMGtuc3hJVXFyeVJWbW9OeFREUElxQXhWU1NheEYycDh5SU1GUUxhbFpvSVFBQUFBJCQAAAAAAAAAAAEAAABJ4AzMdXV2dncAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAvdLmgL3S5oaU'
-
 
 def timestamp_to_datetime(timestamp: int, format_str: str = "%Y-%m-%d %H:%M") -> str:
     """
@@ -41,15 +38,11 @@ def timestamp_to_datetime(timestamp: int, format_str: str = "%Y-%m-%d %H:%M") ->
 class TiebaSpider:
     """基于 aiotieba 的贴吧爬虫类"""
 
-    def __init__(self, bduss: str = BDUSS) -> None:
+    def __init__(self) -> None:
         """
         初始化爬虫对象
-
-        Args:
-            bduss: 百度用户 Cookie（BDUSS），默认从模块常量读取
         """
         self.tb_client: Optional[Client] = None
-        self.bduss = bduss
         self.index_manager = IndexManager()
         self.index_path = Path('data') / 'index.json'
 
@@ -76,7 +69,7 @@ class TiebaSpider:
             if self.tb_client is not None:
                 return
 
-            self.tb_client = Client(self.bduss)
+            self.tb_client = Client()
             await self.tb_client.__aenter__()
             logger.info("aiotieba 客户端已挂载")
 
