@@ -1,8 +1,7 @@
-beautifulsoup4==4.14.3
+aiotieba==4.6.4
 fake_useragent==2.2.0
 httpx==0.28.1
 pyside6==6.9.3
 pyside6_addons==6.9.3
 pyside6_essentials==6.9.3
-h2==4.3.0
-lxml==6.0.2
+tenacity==9.1.4
