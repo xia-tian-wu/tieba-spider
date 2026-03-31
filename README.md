@@ -2,11 +2,36 @@
 
 一个用于将贴吧帖子保存到本地并提供离线浏览的工具。
 
-✅ 当前状态：维护中（2026 年重构版）
+当前状态：维护中（2026 年重构版）
 
 ---
 
-## 📌 功能
+## 截图预览
+
+### 主界面
+![主界面截图](./assets/screenshot/main.png)
+
+### 批量管理
+![批量管理截图](assets/screenshot/manage.png)
+
+### 勾选和菜单
+![批量管理截图](assets/screenshot/batch.png)
+
+### 日志输出
+![日志输出截图](assets/screenshot/log.png)
+
+### 白天模式
+![日志输出截图](assets/screenshot/day_mode.png)
+
+### 夜间模式
+![日志输出截图](assets/screenshot/night_mode.png)
+
+### 图片浏览
+![日志输出截图](assets/screenshot/pic_edit.png)
+
+---
+
+## 功能
 
 * 抓取帖子内容（楼层、用户、时间、IP 属地等）
 * 转换为 Markdown 格式
@@ -17,7 +42,7 @@
 
 ---
 
-## 📁 存储结构
+## 存储结构
 
 ```text
 data/
@@ -29,7 +54,7 @@ data/
 
 ---
 
-## 🧠 设计
+## 设计
 
 ```text
 aiotieba API → 数据解析 → 本地存储 → index → Markdown
@@ -39,262 +64,105 @@ aiotieba API → 数据解析 → 本地存储 → index → Markdown
 
 ---
 
-## 📦 技术栈
+## 技术栈
 
-* **后端核心**：`aiotieba` - 贴吧 API 封装库
-* **异步框架**：`asyncio` + `httpx`
+* **后端核心**：[aiotieba](https://github.com/lumina37/aiotieba) - 贴吧 API 封装库
+* **图片下载**：`asyncio` + `httpx`
 * **界面框架**：`PySide6`
 * **数据解析**：内置解析器
 
 ---
 
-## 🧾 说明
-
-本项目于 2026 年完成重构，从基于 HTML 解析的方案迁移至 `aiotieba` API 方案，解决了贴吧改版导致的爬取失效问题。
-
----
-
-以下是原先的介绍，以作纪念。
-
----
-
-一个简易的，基于 PySide6 的贴吧帖子爬取工具，支持完整爬取、增量更新、批量管理。
-
-<div align="center">
-
-[功能特性](#功能特性) • [快速开始](#快速开始) • [使用教程](#使用教程) • [常见问题](#常见问题)
-
-</div>
-
----
-
-## 截图预览
-
-### 主界面 
-
-![主界面截图](./assets/screenshot/main.png)
-
-### 批量管理 
-
-![批量管理截图](assets/screenshot/manage.png)
-
-### 勾选和菜单 
-
-![批量管理截图](assets/screenshot/batch.png)
-
-### 日志输出 
-
-![日志输出截图](assets/screenshot/log.png)
-
-### 白天模式
-
-![日志输出截图](assets/screenshot/day_mode.png)
-
-### 夜间模式
-
-![日志输出截图](assets/screenshot/night_mode.png)
-
-### 图片浏览
-
-![日志输出截图](assets/screenshot/pic_edit.png)
-
----
-
-## 功能特性
-
-### 核心功能
-
-* **单帖爬取**：输入帖子链接，完整爬取所有楼层
-* **批量爬取**：支持多链接同时爬取
-* **增量更新**：智能检测新增楼层，避免重复爬取
-* **只看楼主**：支持筛选楼主发言
-* **图片下载**：自动下载帖子中的所有图片
-* **Markdown格式**：自动生成格式化的 Markdown 文档
-* **阅读浏览**：纯净阅读体验与模式切换
-
-### 管理功能
-
-* **帖子管理**：查看已爬取帖子列表
-* **批量更新**：选中多个帖子一键更新
-* **批量删除**：清理不需要的帖子数据
-* **搜索过滤**：按标题、类型筛选帖子
-
-### 技术特性
-
-* **异步并发**：基于 asyncio + httpx，高效爬取
-* **单实例保护**：防止多开导致数据冲突
-* **详细日志**：实时显示爬取进度和错误信息
-* **现代 UI**：基于 PySide6 的友好界面
-
----
-
 ## 快速开始
 
-在右侧的release中选择 `TiebaSpider.zip`压缩包下载，解压，进入解压后文件夹，右键 `TiebaSpider.exe`选择在桌面创建快捷方式，随后点击快捷方式即可使用。爬取产生的帖子内容统一保存在解压后文件夹。
+在右侧 Release 中下载 `TiebaSpider.zip`，解压后运行 `TiebaSpider.exe` 即可。
+所有爬取内容自动保存在程序目录下的 `data/` 文件夹。
+
+---
 
 ## 本地部署
 
 ### 环境要求
-
 * Python 3.11
 * Windows 10/11
 
 ### 安装步骤
-
-#### 1. 克隆项目
-
 ```bash
 git clone https://github.com/xia-tian-wu/tieba-spider.git
 cd tieba-spider
-```
-
-#### 2. 安装依赖
-
-```bash
 pip install -r requirements.txt
-```
-
-#### 3. 运行程序
-
-```bash
 python main.py
 ```
 
-### 或者打包为可执行文件
-
+### 打包为 exe
 ```bash
-# 使用 PyInstaller 打包
 pyinstaller TiebaSpider.spec
-
-# 生成的 exe 在 dist/ 目录下
 ```
+
+生成文件在 `dist/` 目录。
 
 ---
 
-## 📖 使用教程
+## 使用教程
 
 ### 爬取单个帖子
-
-1. 点击左侧导航栏的 **爬取** 标签
-2. 在输入框中粘贴贴吧帖子链接
-3. （可选）开启 **只看楼主** 开关
-4. 点击 **开始爬取** 按钮
-5. 等待爬取完成，查看日志输出
+1. 进入 **爬取** 页面
+2. 粘贴贴吧帖子链接
+3. 可选：开启 **只看楼主**
+4. 点击 **开始爬取**
 
 ### 批量爬取
+* 支持多行链接批量导入
+* 自动去重，支持增量更新
 
-1. 在输入框中粘贴多个链接（每行一个）
-2. 点击 **开始爬取**
-3. 如有重复链接，选择处理方式：
+### 管理已爬取帖子
+* 单帖更新 / 重新爬取 / 删除
+* 批量操作
+* 搜索与筛选
 
-   * **忽略跳过**：跳过已存在的帖子
-   * **更新爬取**：增量更新已有帖子
+---
 
-   ### 管理已爬取帖子
-4. 点击左侧导航栏的 **管理** 标签
-5. 查看已爬取的帖子列表
-6. 可对单个帖子进行：
+## 配置说明
 
-   * **增量更新**：检查并下载新楼层
-   * **重新爬取**：完整重新爬取
-   * **删除**：移除帖子数据
-7. 开启 **批量模式** 可进行批量操作
+可在 `config.py` 调整延迟、重试、超时等策略，避免触发限制。
 
-   ---
+---
 
-   ## 📁 数据目录结构
+## 常见问题
 
+* **Q：安全验证/拦截？**
+  A：本项目基于 aiotieba 官方风格 API，拦截率已大幅降低。避免高频爬取即可。
 
-   ```
+* **Q：支持楼中楼吗？**
+  A：当前版本暂不支持。
 
-   TiebaSpider/
-   ├── data/                   # 数据目录（自动生成）
-   │   ├── posts/              # JSON 格式的帖子数据
-   │   ├── images/             # 下载的图片
-   │   ├── markdowns/          # 导出的 Markdown 文件
-   │   ├── index.json          # 帖子索引
-   │   └── index.json.bak      # 备份
-   │ 
-   ├── assets/                 # 项目资源（截图等）
-   ├── spider/                 # 爬虫核心模块
-   ├── ui/                     # 界面模块
-   ├── main.py                 # 程序入口
-   └── requirements.txt        # 依赖列表
-   ```
-   ---
+* **Q：图片下载失败？**
+  A：链接过期、网络问题或反爬限制，可尝试重新爬取。
 
-   ## ⚙️ 配置说明
+* **Q：可以多开吗？**
+  A：不支持，单实例保护防止数据冲突。
 
-   ### 延迟配置（防止被封禁）
+---
 
-   在 `config.py` 中可调整请求延迟：
+## 许可证
 
-   ```python
-   delay_config = {
-       'min_delay': 0.8,    # 最小延迟（秒）
-       'max_delay': 3.0,    # 最大延迟（秒）
-       'base_delay': 1.0,   # 基础延迟
-       'jitter': True,      # 是否启用随机抖动
-   }
-   ```
-   ### 重试配置
+MIT License
 
-   ```python
-   MAX_RETRIES = 5     # 最大重试次数
-   TIMEOUT = 10        # 请求超时时间（秒）
-   ```
-   ---
+---
 
-   ## 常见问题
+## 致谢
 
-   ### Q: 爬取时遇到"百度安全验证"怎么办？
+* 核心 API 支持：**[aiotieba](https://github.com/lumina37/aiotieba)** by lumina37
+* AI 辅助开发：ChatGPT, Gemini, DeepSeek, Qwen, Doubao
+* 开发者：xia-tian-wu
 
-   A: 这是百度的反爬机制，建议：
+---
 
-   1. 增加请求延迟（修改 `config.py`）
-   2. 暂停一段时间后再试
-   3. 避免短时间内大量爬取
+<div align="center">
 
-   ### Q: 楼中楼（回复的回复）能爬取吗？
+如果这个项目对你有帮助，请给一个 ⭐ Star！
 
-   A: 当前版本暂不支持楼中楼爬取。该功能需要额外的 API 接口分析，将在未来版本中考虑添加。
+友情链接：[TiebaArchiver](https://github.com/Sorceresssis/TiebaArchiver)
 
-   ### Q: 图片下载失败怎么办？
+</div>
 
-   A: 可用选择重新爬取整个帖子。可能原因：
-
-   1. 图片链接已失效
-   2. 网络连接问题
-   3. 百度反爬限制
-
-   ### Q: 可以同时运行多个程序吗？
-
-   A: 不建议。程序有单实例保护，多开可能导致数据冲突。
-
-   ---
-
-   ## 许可证
-
-   本项目采用 [MIT 许可证](LICENSE)
-
-   ---
-
-   ## 致谢
-
-   这是一个完全由AI糊泥巴出来的项目，虽然有些晚，但至少对我够用了。
-
-   AI：ChatGPT, Gemini, DeepSeek,Qwen, Doubao（贡献不分先后）
-
-   人：xia-tian-wu
-
-   ---
-
-   <div align="center">
-
-   如果这个项目对你有帮助，请给一个 ⭐ Star！
-
-   友情链接：[TiebaArchiver](https://github.com/Sorceresssis/TiebaArchiver)
-
-   如果希望用完全不丢失格式和楼中楼，贴吧表情等方式保存帖子，试试TiebaArchiver，不过部署, 配置和使用会稍微麻烦些。
-
-   </div>
