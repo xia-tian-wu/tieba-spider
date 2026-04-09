@@ -141,7 +141,7 @@ class TiebaSpider:
             if 'FragText' in type_name:
                 content_parts.append(obj.text)
             elif 'FragLink' in type_name:
-                content_parts.append(f'[{obj.text}]({obj.title})')
+                content_parts.append(f'[{obj.title}]({obj.text})')
             elif 'FragImage' in type_name:
                 image_url = url_prefix + obj.hash
                 image_url_list.append(image_url)

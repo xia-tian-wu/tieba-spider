@@ -48,24 +48,47 @@ class TiebaImageDownloader:
     )
     async def _extract_waterurl(self, preview_url: str) -> Optional[str]:
         """
-        从预览页HTML中用正则提取带签名的 waterurl
+        从预览页HTML中用正则提取带签名的 waterurl（分层匹配，兼容多格式）
+        
+        匹配优先级：
+        1. tiebapic.baidu.com (含 ?tbpicau= 参数，优先)
+        2. imgsa.baidu.com/forum/pic/item/xxx.jpg (纯净jpg链接)
+        3. 通用 https:// 开头的 waterurl (兜底)
         """
         resp = await self.client.get(preview_url, timeout=HTTP_TIMEOUT)
         resp.raise_for_status()
         
-        # 正则匹配："waterurl":"https://tiebapic.baidu.com/...jpg?tbpicau=..."
-        waterurl_pattern = re.compile(r'"waterurl":"(https://tiebapic\.baidu\.com[^"]+)"')
-        match = waterurl_pattern.search(resp.text)
+        html_text = resp.text
         
+        # ========== 优先级 1: tiebapic.baidu.com (带参数的高清图) ==========
+        pattern1 = re.compile(r'"waterurl"\s*:\s*"(https://tiebapic\.baidu\.com[^"]+)"')
+        match = pattern1.search(html_text)
         if match:
-            highres_url = match.group(1)
-            # 处理 JSON 转义字符：把 \/ 替换回 /
-            highres_url = highres_url.replace("\\/", "/")
-            print(f"成功提取 waterurl：{highres_url[:80]}...")
-            return highres_url
-        else:
-            print(f"无法从预览页提取 waterurl：{preview_url}")
-            return None
+            url = match.group(1).replace("\\/", "/")
+            print(f"✓ 模式1匹配 (tiebapic): {url[:80]}...")
+            return url
+        
+        # ========== 优先级 2: imgsa.baidu.com/forum/pic/item/ (纯净jpg) ==========
+        pattern2 = re.compile(r'"waterurl"\s*:\s*"(https://imgsa\.baidu\.com/forum/pic/item/[^"]+\.jpg[^"]*)"')
+        match = pattern2.search(html_text)
+        if match:
+            url = match.group(1).replace("\\/", "/")
+            print(f"✓ 模式2匹配 (imgsa): {url[:80]}...")
+            return url
+        
+        # ========== 优先级 3: 通用 https:// 开头 (兜底方案) ==========
+        pattern3 = re.compile(r'"waterurl"\s*:\s*"(https://[^"]+)"')
+        match = pattern3.search(html_text)
+        if match:
+            url = match.group(1).replace("\\/", "/")
+            # 简单过滤明显无效的链接
+            if not any(kw in url.lower() for kw in ['blank', 'error', '404', 'default']):
+                print(f"✓ 模式3匹配 (generic): {url[:80]}...")
+                return url
+        
+        # ========== 全部匹配失败 ==========
+        print(f"✗ 无法从预览页提取 waterurl：{preview_url}")
+        return None
 
     # ===================== 核心：下载图片文件 =====================
     @retry(
