@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, app_instance: QApplication):
         super().__init__()
-        self.setWindowTitle("TiebaSpider v2.0")
+        self.setWindowTitle("TiebaSpider v2.1")
 
         self.setMinimumSize(1000, 600)
         icon_path = SOURCE_PATH / 'ui' /'momo.ico'
