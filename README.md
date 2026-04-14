@@ -76,7 +76,9 @@ aiotieba API → 数据解析 → 本地存储 → index → Markdown
 ## 快速开始
 
 在右侧 Release 中下载 `TiebaSpider.zip`，解压后运行 `TiebaSpider.exe` 即可。
-所有爬取内容自动保存在程序目录下的 `data/` 文件夹。
+所有爬取内容自动保存在程序目录下的 `data/` 文件夹，与`TiebaSpider.exe`同级。
+请不要修改文件夹中的`TiebaSpider.exe`位置。建议在桌面创建`TiebaSpider`的快捷方式，方便使用和整体迁移。
+如果你知道什么是🐭🐭饭，选择内置版本，否则选择纯净正式版。
 
 ---
 
