@@ -33,7 +33,6 @@ def get_data_path() -> Path:
     
 # 全局定义数据路径
 BASE_PATH = get_data_path()
-print(BASE_PATH)
 DATA_DIR = BASE_PATH / 'data'
 POSTS_DIR = DATA_DIR / "posts"
 IMAGES_DIR = DATA_DIR / "images"

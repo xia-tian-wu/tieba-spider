@@ -422,18 +422,22 @@ class PageManage(QWidget):
             )
             return
         
+        # 检查窗口是否关闭
+        if self.viewer_window is not None:
+            # 如果窗口已关闭（isVisible() 为False），则清空引用
+            if not self.viewer_window.isVisible():
+                self.viewer_window = None
+        
         # 创建或获取阅读器窗口
         if self.viewer_window is None:
-            self.viewer_window = MarkdownViewerWindow(self)
+            self.viewer_window = MarkdownViewerWindow()
         
         # 打开文件
         self.viewer_window.open_markdown(md_path, display_name)
+            
         
-        # 显示窗口（如果已关闭）
-        if not self.viewer_window.isVisible():
-            self.viewer_window.show()
-        
-        # 激活窗口
+        # 显示并激活窗口
+        self.viewer_window.show()
         self.viewer_window.activateWindow()
         self.viewer_window.raise_()
 

@@ -51,8 +51,8 @@ class MainWindow(QMainWindow):
         self.global_progress_bar.setTextVisible(True)
         self.global_progress_bar.hide()
         self.global_progress_bar.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Fixed
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed
         )
 
         self.global_progress_mgr = TaskProgressManager(
@@ -114,6 +114,12 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         remove_ui_handler(self.ui_log_handler)
+        
+        # 关闭Markdown阅读器窗口
+        manage_page = self.stacked_widget.widget(1)
+        if hasattr(manage_page, 'viewer_window') and manage_page.viewer_window:
+            manage_page.viewer_window.close()
+        
         super().closeEvent(event)
 
     def clear_log(self):

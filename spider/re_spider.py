@@ -71,14 +71,12 @@ class TiebaSpider:
 
             self.tb_client = Client()
             await self.tb_client.__aenter__()
-            # logger.info("aiotieba 客户端已挂载")
 
     async def cleanup(self) -> None:
         """清理客户端资源"""
         if self.tb_client is not None:
             try:
                 await self.tb_client.__aexit__(None, None, None)
-                # logger.info("aiotieba 客户端已关闭")
             except Exception as e:
                 logger.error(f"清理 aiotieba 客户端失败：{e}")
             finally:
@@ -148,7 +146,7 @@ class TiebaSpider:
                 content_parts.append(f'[图片：{obj.hash}.jpg]')
 
         floor_data: FloorData = {
-            'author': str(post.user.user_name if post.user.user_name else post.user.nick_name_new),
+            'author': str(post.user.nick_name_new if post.user.nick_name_new else post.user.user_name),
             'content': ''.join(content_parts),
             'images': image_url_list,
             'local_images': [],
@@ -205,7 +203,6 @@ class TiebaSpider:
             history_max_floor = 0
 
             if not force_recrawl and index_key in index:
-                # logger.info(f"检测到历史数据，切换至增量更新模式：{tid}")
                 history_post_index = index[index_key]
                 history_file_path = self.index_path.parent / history_post_index['file_path']
 
@@ -425,7 +422,7 @@ class TiebaSpider:
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(post_data, f, ensure_ascii=False, indent=2)
 
-        logger.info(f"帖子数据已保存：{filepath}")
+        logger.info(f"帖子数据已保存：{post_data['title']}")
 
         # 2. 生成 Markdown
         try:

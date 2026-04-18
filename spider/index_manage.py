@@ -181,8 +181,6 @@ class IndexManager:
             - 删除 data/markdowns/ 下的 .md 文件
             - 从 index.json 中移除对应条目
         """
-        logger.info(f"开始删除帖子: {post_id}, see_lz={see_lz}")
-        
         try:
             # 1. 获取索引键并加载索引
             index_key = self.get_index_key(post_id, see_lz)
@@ -195,6 +193,7 @@ class IndexManager:
             post_meta = index[index_key]
             file_path = post_meta["file_path"]  # 如 "posts/xxx.json"
             display_name = post_meta["display_name"]
+            logger.info(f"开始删除帖子: {display_name}")
             
             # 2. 删除 JSON 文件
             json_full_path = os.path.join("data", file_path)

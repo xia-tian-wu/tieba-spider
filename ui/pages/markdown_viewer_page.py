@@ -1,8 +1,9 @@
 from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QTabWidget, QMessageBox, QWidget
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Qt
+from PySide6.QtGui import QIcon
 from pathlib import Path
 from ui.pages.functions.markdown_viewer import MarkdownViewer
-
+from config import SOURCE_PATH
 
 class MarkdownViewerWindow(QMainWindow):
     """Markdown 阅读器窗口 - 独立窗口，支持多标签页管理"""
@@ -12,6 +13,11 @@ class MarkdownViewerWindow(QMainWindow):
         self.setWindowTitle("帖子阅读器")
         self.resize(1200, 800)
         self.viewers = {}  # tab_id -> MarkdownViewer
+        
+        icon_path = SOURCE_PATH / 'ui' / 'momo.ico'
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
+            
         self.init_ui()
 
     def init_ui(self):
@@ -125,3 +131,9 @@ class MarkdownViewerWindow(QMainWindow):
         while self.tab_widget.count() > 0:
             self.close_tab(0)
         self.viewers.clear()
+        
+    def closeEvent(self, event):
+        """窗口关闭时清空所有标签页和缓存"""
+        self.clear_all()  # 调用已有方法清空标签页
+        self.viewers.clear()  # 确保字典清空
+        event.accept()

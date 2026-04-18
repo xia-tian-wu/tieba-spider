@@ -65,7 +65,6 @@ class TiebaImageDownloader:
         match = pattern1.search(html_text)
         if match:
             url = match.group(1).replace("\\/", "/")
-            print(f"✓ 模式1匹配 (tiebapic): {url[:80]}...")
             return url
         
         # ========== 优先级 2: imgsa.baidu.com/forum/pic/item/ (纯净jpg) ==========
@@ -73,7 +72,6 @@ class TiebaImageDownloader:
         match = pattern2.search(html_text)
         if match:
             url = match.group(1).replace("\\/", "/")
-            print(f"✓ 模式2匹配 (imgsa): {url[:80]}...")
             return url
         
         # ========== 优先级 3: 通用 https:// 开头 (兜底方案) ==========
@@ -83,11 +81,9 @@ class TiebaImageDownloader:
             url = match.group(1).replace("\\/", "/")
             # 简单过滤明显无效的链接
             if not any(kw in url.lower() for kw in ['blank', 'error', '404', 'default']):
-                print(f"✓ 模式3匹配 (generic): {url[:80]}...")
                 return url
         
         # ========== 全部匹配失败 ==========
-        print(f"✗ 无法从预览页提取 waterurl：{preview_url}")
         return None
 
     # ===================== 核心：下载图片文件 =====================

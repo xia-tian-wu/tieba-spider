@@ -3,7 +3,8 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 from pathlib import Path
 from markdown_it import MarkdownIt
-
+import uuid
+import tempfile
 
 class MarkdownViewer(QWidget):
     """Markdown 阅读器组件 - 使用 QWebEngineView 渲染"""
@@ -11,23 +12,21 @@ class MarkdownViewer(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.current_md_path = None
+        self._temp_html_path = None
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-
-        # Web 视图
         self.web_view = QWebEngineView()
         layout.addWidget(self.web_view)
-
         self.setLayout(layout)
-    
+
     def load_markdown(self, md_path: Path, display_name: str = ""):
         """加载并渲染 Markdown 文件"""
         try:
             self.current_md_path = md_path
-            
+
             if not md_path.exists():
                 QMessageBox.warning(
                     self,
@@ -35,20 +34,29 @@ class MarkdownViewer(QWidget):
                     f"找不到 Markdown 文件：\n{md_path}"
                 )
                 return False
-            
+
             md_text = md_path.read_text(encoding="utf-8")
-            
             md = MarkdownIt("commonmark", {"html": True})
             html_body = md.render(md_text)
-            
             html = self._build_html(html_body)
-            
-            # 设置基础 URL，以便相对路径的图片能正常加载
+
+            self._cleanup_temp_file()
+
+            temp_dir = tempfile.gettempdir()
+            file_name = f"render_{uuid.uuid4().hex}.html"
+            temp_file_path = Path(temp_dir) / file_name
+
+            with open(temp_file_path, 'w', encoding='utf-8') as f:
+                f.write(html)
+
+            self._temp_html_path = temp_file_path
+
             base_url = QUrl.fromLocalFile(str(md_path.parent.absolute()) + "/")
-            self.web_view.setHtml(html, base_url)
-            
+            file_url = QUrl.fromLocalFile(temp_file_path)
+            self.web_view.load(file_url)
+
             return True
-            
+
         except Exception as e:
             QMessageBox.critical(
                 self,
@@ -56,16 +64,35 @@ class MarkdownViewer(QWidget):
                 f"无法加载 Markdown 文件：\n{str(e)}"
             )
             return False
-    
+
+    def _cleanup_temp_file(self):
+        """删除临时文件"""
+        if self._temp_html_path and self._temp_html_path.exists():
+            try:
+                self._temp_html_path.unlink()
+            except Exception:
+                pass
+            self._temp_html_path = None
+
+    def closeEvent(self, event):
+        """窗口关闭时清理"""
+        self._cleanup_temp_file()
+        super().closeEvent(event)
+
+    def __del__(self):
+        """对象销毁时清理"""
+        self._cleanup_temp_file()
+
     def _build_html(self, html_body: str) -> str:
         """构建完整的 HTML 文档，包含所有 CSS 和 JavaScript"""
-        
+        base_href = QUrl.fromLocalFile(str(self.current_md_path.parent.absolute()) + "/").toString()
+
         return f'''<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
+<base href="{base_href}">
 <style>
-
 /* --- 基础设置 --- */
 body {{
     background: #eef1f5;
@@ -94,12 +121,9 @@ body {{
     max-height: 93vh;
     overflow-y: auto;
     background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(5px);
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-
-    /* 滚动条在左侧 */
     direction: rtl;
 }}
 
@@ -107,7 +131,7 @@ body {{
     display: flex;
     flex-direction: column;
     gap: 5px;
-    direction: ltr; /* 内容保持从左到右 */
+    direction: ltr;
 }}
 
 /* 自定义滚动条样式 */
@@ -143,19 +167,25 @@ body {{
 .container {{
     flex: 1;
     max-width: 900px;
-    font-family: "Segoe UI","Microsoft YaHei",sans-serif;
     min-width: 0;
 }}
 
-/* 标题 H1 居中 */
-h1 {{
-    text-align: center;
+.container > p,
+.container > ul,
+.container > ol,
+.container > blockquote,
+.container > pre,
+.container > img {{
+    background: white;
+    margin: 0;
+    padding: 8px 20px;
+    line-height: 1.6;
     color: #333;
-    margin-bottom: 30px;
+    display: block;
 }}
 
-/* 引用块信息 */
-blockquote {{
+.container > ul, .container > ol {{ padding-left: 40px; }}
+.container > blockquote {{
     border-left: 4px solid #ddd;
     margin: 0 0 20px 0;
     padding: 10px 16px;
@@ -164,62 +194,38 @@ blockquote {{
     border-radius: 6px;
 }}
 
+h1 {{
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    border-radius: 8px 8px 0 0;
+}}
+
 /* 楼层标题 H3 */
 h3 {{
-    margin-top: 35px;
+    margin-top: 30px;
     margin-bottom: 0;
-    padding: 12px 16px;
+    padding: 15px 20px;
     background: #ffffff;
-    border-left: 4px solid #4a90e2;
-    border-radius: 6px;
+    border-left: 5px solid #4a90e2;
+    border-radius: 8px 8px 0 0;
     font-size: 18px;
     color: #333;
     scroll-margin-top: 20px;
 }}
 
-/* 段落与列表样式 */
-h3 ~ p,
-h3 ~ ul,
-h3 ~ ol,
-h3 ~ blockquote,
-h3 ~ img,
-h3 ~ pre {{
-    background: white;
-    padding-left: 16px;
-    padding-right: 16px;
+h3 + p, h3 + ul, h3 + blockquote {{
+    border-top: none;
 }}
 
-/* 连续段落的间距处理 */
-h3 + p,
-h3 + p + p,
-h3 + p + p + p,
-h3 + p + p + p + p {{
-    margin: 0;
+hr {{
+    border: none;
+    height: 1px;
+    background: #ddd;
+    position: relative;
 }}
 
-
-
-
-p {{
-    background: white;
-    padding: 8px 16px;
-    margin: 0;
-    line-height: 1.6;
-    color: #333;
-}}
-
-
-a {{
-    color: #4a90e2;
-    text-decoration: none;
-}}
-
-
-a:hover {{
-    text-decoration: underline;
-}}
-
-/* 图片样式 - 修复边框和圆角 */
+/* 图片样式 */
 img {{
     display: block;
     margin: 0 auto;
@@ -227,34 +233,72 @@ img {{
     max-width: 100%;
     height: auto;
     padding: 10px 16px;
-    border-radius: 6px; /* 四个角统一圆角 */
+    border-radius: 6px;
     cursor: zoom-in;
     box-sizing: border-box;
-    border: 1px solid #eee; /* 浅色细边框代替黑色边框 */
+    border: 1px solid #eee;
 }}
 
-/* 代码块 */
-code {{
-    background: #f2f2f2;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-family: Consolas, monospace;
-    color: #d63384;
+/* --- 深色模式 --- */
+body.dark-mode {{ background: #1a1a2e; }}
+
+body.dark-mode .container > p,
+body.dark-mode .container > ul,
+body.dark-mode .container > ol,
+body.dark-mode .container > blockquote,
+body.dark-mode .container > pre,
+body.dark-mode .container > img,
+body.dark-mode h3 {{
+    background: #2d2d44;
+    color: #d0d0e0;
 }}
 
-pre {{
-    background: #f6f8fa;
-    padding: 10px;
-    overflow-x: auto;
-    border-radius: 6px;
-    margin: 0;
+body.dark-mode h3 {{ border-left-color: #7eb8ff; }}
+
+body.dark-mode .toc-wrapper {{
+    background: rgba(43, 43, 58, 0.95);
 }}
 
-hr {{
-    border: none;
-    height: 1px;
-    background: #ddd;
-    margin: 30px 0;
+body.dark-mode a {{
+    color: #7eb8ff;
+}}
+
+body.dark-mode .toc a {{
+    color: #b8b8d1;
+}}
+
+body.dark-mode .toc a:hover {{
+    color: #7eb8ff;
+    background: rgba(126, 184, 255, 0.15);
+}}
+
+body.dark-mode h1 {{
+    color: #e8e8f0;
+}}
+
+body.dark-mode p,
+body.dark-mode img,
+body.dark-mode blockquote,
+body.dark-mode pre {{
+    background: #2d2d44;
+    color: #d0d0e0;
+}}
+
+body.dark-mode blockquote {{
+    border-left-color: #555577;
+}}
+
+body.dark-mode code {{
+    background: #3d3d5c;
+    color: #ff9ebb;
+}}
+
+body.dark-mode hr {{
+    background: #444466;
+}}
+
+body.dark-mode img {{
+    border-color: #444466;
 }}
 
 /* --- 灯箱 (Lightbox) --- */
@@ -314,87 +358,17 @@ hr {{
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }}
 
-/* 太阳图标 (白天模式显示) */
-.sun-icon {{
-    display: block;
-}}
-
-/* 月亮图标 (夜晚模式显示) */
-.moon-icon {{
-    display: none;
-}}
-
-/* --- 深色模式样式 --- */
-body.dark-mode {{
-    background: #1a1a2e;
-}}
-
-body.dark-mode .toc-wrapper {{
-    background: rgba(43, 43, 58, 0.95);
-}}
-
-body.dark-mode a {{
-    color: #7eb8ff;
-}}
-
-body.dark-mode .toc a {{
-    color: #b8b8d1;
-}}
-
-body.dark-mode .toc a:hover {{
-    color: #7eb8ff;
-    background: rgba(126, 184, 255, 0.15);
-}}
-
-body.dark-mode h1 {{
-    color: #e8e8f0;
-}}
-
-body.dark-mode h3 {{
-    background: #2d2d44;
-    color: #e8e8f0;
-    border-left-color: #7eb8ff;
-}}
-
-body.dark-mode p,
-body.dark-mode img,
-body.dark-mode blockquote,
-body.dark-mode pre {{
-    background: #2d2d44;
-    color: #d0d0e0;
-}}
-
-body.dark-mode blockquote {{
-    border-left-color: #555577;
-}}
-
-body.dark-mode code {{
-    background: #3d3d5c;
-    color: #ff9ebb;
-}}
-
-body.dark-mode hr {{
-    background: #444466;
-}}
-
-body.dark-mode img {{
-    border-color: #444466;
-}}
+.sun-icon {{ display: block; }}
+.moon-icon {{ display: none; }}
 
 body.dark-mode .theme-toggle {{
     background: #2d2d44;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }}
 
-body.dark-mode .sun-icon {{
-    display: none;
-}}
+body.dark-mode .sun-icon {{ display: none; }}
+body.dark-mode .moon-icon {{ display: block; }}
 
-body.dark-mode .moon-icon {{
-    display: block;
-}}
-
-/* --- 灯箱导航按钮 --- */
 .nav {{
     position: absolute;
     top: 50%;
@@ -417,7 +391,6 @@ body.dark-mode .moon-icon {{
 .prev {{ left: 20px; }}
 .next {{ right: 20px; }}
 
-/* --- 灯箱工具栏 --- */
 .toolbar {{
     position: absolute;
     bottom: 30px;
@@ -443,7 +416,6 @@ body.dark-mode .moon-icon {{
     background: rgba(255,255,255,0.4);
 }}
 
-/* 图片计数器 */
 .image-counter {{
     position: absolute;
     top: 20px;
@@ -455,7 +427,7 @@ body.dark-mode .moon-icon {{
     padding: 6px 12px;
     border-radius: 4px;
 }}
-/* 自定义滚动条样式 */
+
 ::-webkit-scrollbar {{
     width: 10px;
     height: 10px;
@@ -467,17 +439,14 @@ body.dark-mode .moon-icon {{
 ::-webkit-scrollbar-thumb {{
     background: #888;
     border-radius: 5px;
-    /* 可选：给滑块加一点点透明，更柔和 */
     opacity: 0.8;
 }}
 ::-webkit-scrollbar-thumb:hover {{
     background: #555;
     opacity: 1;
 }}
-
 </style>
 </head>
-
 <body>
 
 <!-- 日夜模式切换按钮 -->
@@ -502,64 +471,48 @@ body.dark-mode .moon-icon {{
 
 <!-- 图片放大灯箱 -->
 <div class="lightbox" id="lightbox">
+    <button class="nav prev" id="prevBtn">◀</button>
+    <div class="image-counter" id="imageCounter">1 / 1</div>
+    <img id="lightbox-img" src="">
+    <button class="nav next" id="nextBtn">▶</button>
 
-<button class="nav prev" id="prevBtn">◀</button>
-
-<div class="image-counter" id="imageCounter">1 / 1</div>
-
-<img id="lightbox-img" src="">
-
-<button class="nav next" id="nextBtn">▶</button>
-
-<div class="toolbar" id="toolbar">
-<button id="zoom-in">＋</button>
-<button id="zoom-out">－</button>
-<button id="rotate">⟳</button>
-<button id="flip-h">⇋</button>
-<button id="flip-v">⇅</button>
-<button id="reset">Reset</button>
-</div>
-
+    <div class="toolbar" id="toolbar">
+    <button id="zoom-in">＋</button>
+    <button id="zoom-out">－</button>
+    <button id="rotate">⟳</button>
+    <button id="flip-h">⇋</button>
+    <button id="flip-v">⇅</button>
+    <button id="reset">Reset</button>
+    </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {{
-    // 1. 生成目录
+    /* 1. 生成目录 */
     const headings = document.querySelectorAll("h1, h3");
     const tocContainer = document.getElementById("toc");
+    tocContainer.innerHTML = "";
 
     if (headings.length === 0) {{
         tocContainer.innerHTML = '<div style="padding:10px; color:#999;">无楼层目录</div>';
     }} else {{
-        tocContainer.innerHTML = '';
+        const fragment = document.createDocumentFragment();
         headings.forEach((h, i) => {{
             const id = "floor_" + i;
             h.id = id;
-
-
             const a = document.createElement("a");
             a.href = "#" + id;
-            let text = h.textContent.trim().split('\\n')[0];
-            if(text.length > 10) text = text.substring(0, 10) + "...";
-
-            if (h.tagName === "H1") {{
-                a.textContent = "简介";
-            }} else {{
-                a.textContent = "楼层 " + i;
-            }}
-            a.title = h.textContent.trim();
-
+            a.textContent = h.tagName === "H1" ? "简介" : "楼层 " + i;
             a.onclick = (e) => {{
                 e.preventDefault();
-                h.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
-                history.pushState(null, null, '#' + id);
+                h.scrollIntoView({{ behavior: 'auto', block: 'start' }});
             }};
-
-            tocContainer.appendChild(a);
+            fragment.appendChild(a);
         }});
+        tocContainer.appendChild(fragment);
     }}
 
-    // 2. 图片灯箱功能
+    /* 2. 图片灯箱功能 */
     const imgs = document.querySelectorAll(".container img");
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightbox-img");
@@ -585,15 +538,9 @@ document.addEventListener('DOMContentLoaded', () => {{
     function showImage(index) {{
         if(index < 0) index = imgs.length - 1;
         if(index >= imgs.length) index = 0;
-
-
         currentIndex = index;
-
-
         lightboxImg.src = imgs[index].src;
 
-
-        // 重置变换
         scale = 1;
         rotate = 0;
         flipH = 1;
@@ -602,24 +549,24 @@ document.addEventListener('DOMContentLoaded', () => {{
         updateCounter();
     }}
 
-    // 为每张图片绑定点击事件
+    /* 为每张图片绑定点击事件 */
     imgs.forEach((img, i) => {{
         img.onclick = (e) => {{
-            e.stopPropagation(); // 阻止冒泡
+            e.stopPropagation();
             lightbox.classList.add("active");
             document.body.style.overflow = 'hidden';
             showImage(i);
         }}
     }});
 
-    // 灯箱背景点击关闭（只有点击背景才关闭，点击图片和按钮不关闭）
+    /* 灯箱背景点击关闭 */
     lightbox.onclick = (e) => {{
         if (e.target === lightbox) {{
             closeLightbox();
         }}
     }};
 
-    // 左右切换按钮 - 阻止冒泡
+    /* 左右切换按钮 */
     document.getElementById("prevBtn").onclick = (e) => {{
         e.stopPropagation();
         showImage(currentIndex - 1);
@@ -630,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {{
         showImage(currentIndex + 1);
     }}
 
-    // 工具按钮 - 阻止冒泡
+    /* 工具按钮 */
     document.getElementById("zoom-in").onclick = (e) => {{
         e.stopPropagation();
         scale *= 1.2;
@@ -670,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {{
         updateTransform();
     }}
 
-    // 关闭灯箱函数
+    /* 关闭灯箱函数 */
     const closeLightbox = () => {{
         lightbox.classList.remove('active');
         setTimeout(() => {{
@@ -679,13 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {{
         document.body.style.overflow = '';
     }};
 
-    // ESC 键关闭
+    /* ESC 键关闭 */
     document.addEventListener('keydown', (e) => {{
         if (e.key === "Escape" && lightbox.classList.contains('active')) {{
             closeLightbox();
         }}
-
-        // 方向键切换图片
         if (lightbox.classList.contains('active')) {{
             if (e.key === "ArrowRight") {{
                 showImage(currentIndex + 1);
@@ -696,19 +641,17 @@ document.addEventListener('DOMContentLoaded', () => {{
         }}
     }});
 
-    // 3. 日夜模式切换
+    /* 3. 日夜模式切换 */
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
-
-    // 检查本地存储的偏好
     const savedTheme = localStorage.getItem('theme');
+
     if (savedTheme === 'dark') {{
         body.classList.add('dark-mode');
     }}
 
     themeToggle.onclick = () => {{
         body.classList.toggle('dark-mode');
-        // 保存偏好
         if (body.classList.contains('dark-mode')) {{
             localStorage.setItem('theme', 'dark');
         }} else {{
@@ -717,11 +660,5 @@ document.addEventListener('DOMContentLoaded', () => {{
     }};
 }});
 </script>
-
 </body>
 </html>'''
-    
-    def clear(self):
-        """清空当前内容"""
-        self.web_view.setHtml("<html><body></body></html>")
-        self.current_md_path = None
